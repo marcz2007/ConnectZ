@@ -1,4 +1,5 @@
 import sys
+import itertools as IT
 
 """Method which determines whether a player has won horizontally. Uses the connectZ board, now
 filled in with the game as each turn is made. Also uses turns_taken to save running the 
@@ -51,20 +52,66 @@ def vertical_winner(connect_board, winning_target):
 
 
 """Method which determines whether a player has won diagonally. Uses the connectZ board, now
-filled in with the game as each turn is made. There are two arrays, diagonaly_array_left which
-creates arrays from bottom left to top right, """
+filled in with the game as each turn is made. Method uses the iterator to check every element
+in the matrix and its diagonal partner for equality, winner is found if there are equal numbers
+ of diagonal matches to the winning target"""
 
 
 def diagonal_winner(connect_board, winning_target):
     height = len(connect_board)
-    diagonal_array_left = [connect_board[i][i] for i in range(height)]
-    print('diagonal left: ', diagonal_array_left)
-    diagonal_array_right = [connect_board[i][height - 1 - i] for i in range(height)]
-    print('diagonal right: ', diagonal_array_right)
-    if (diagonal_array_left.count(1) == winning_target or diagonal_array_left.count(2) == winning_target) or (
-            diagonal_array_right.count(1) == winning_target or diagonal_array_right.count(2) == winning_target):
-        print('diagonal winner found')
-        return True
+    d = dict()
+    for i, j in IT.product(range(height), repeat=2):
+        d.setdefault(j - i, []).append((i, j))
+
+    diagonal_array = [[connect_board[i][j] for i, j in d[k]] for k in range(-height + 1, height)]
+    print(diagonal_array)
+    for i in range(len(diagonal_array)):
+        if diagonal_array[i].count(1) == winning_target or diagonal_array[i].count(2) == winning_target:
+            print(diagonal_array[i])
+            print('Diagonal Winner found')
+            return True
+
+    # [[7], [4, 8], [1, 5, 9], [2, 6], [3]]
+    # height = len(connect_board) - 1
+    # width = len(connect_board[0])
+    # vertical = height
+    # horizontal = 0
+    # all_elements = height * width
+    # count = 0
+    # while count < all_elements+1:
+    #     vertical = height
+    #     diag_array = []
+    #     for hoz in range(width):
+    #         print(connect_board[vertical][hoz])
+    #         le = len(diag_array)
+    #         if len(diag_array) != width + 1:
+    #             diag_array.append(connect_board[vertical][hoz])
+    #         else:
+    #             diag_array = connect_board[vertical][hoz]
+    #
+    #         print(diag_array)
+    #
+    #         vertical -= 1
+    #     count += 1
+
+    # for vertical in range(height, 0, -1):
+    #
+    #     for horizontal in range(width):
+    #         height_remainder = vertical - height
+    #         width_remainder = width - horizontal
+
+    # diagonal_array_left = [connect_board[i][i] for i in range(height), connect_board[j][j] for j in range(width)]
+    # print('diagonal left: ', diagonal_array_left)
+    # diagonal_array_right = [connect_board[i][height - 1 - i] for i in range(height)]
+    # print('diagonal right: ', diagonal_array_right)
+    # if (diagonal_array_left.count(1) == winning_target or diagonal_array_left.count(2) == winning_target) or (
+    #         diagonal_array_right.count(1) == winning_target or diagonal_array_right.count(2) == winning_target):
+    #     print('diagonal winner found')
+    #     return True
+
+
+"""Method checks if there has been a winner bu calling the vertical, horizontal and diagonal win methods. It only does this
+when there have been enough turs for there to be a winner in order to improve efficiency."""
 
 
 def winner(connect_board, game_dimensions, turns_taken):
@@ -77,6 +124,9 @@ def winner(connect_board, game_dimensions, turns_taken):
             return True
         else:
             return False
+
+
+"""Simple declare winner method depending on whether player1 is true or false."""
 
 
 def declare_winner(player1):
@@ -134,7 +184,7 @@ def run_game(game_dimensions, game_outcome):
                             print('Illegal Continue', 4)
                             return 4
                         else:
-                            # print(2)
+                            print(2)
                             return 2
                     player1 = True
                 row_checker = True
@@ -148,7 +198,12 @@ def run_game(game_dimensions, game_outcome):
                 row_checker = False
     # print('Max col counter', max_column_height_counter)
     print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in connect_board]))
+    if not winner(connect_board, game_dimensions, turns_taken):
+        print('Incomplete Game')
+        return 3
 
+"""Method reads the inputted file and extracts the data from it. Uses a try/catch (except in python) to ensure the file does not terminate
+the program if not found. Calls the run_game method if it is found and it is both a legal and valid game."""
 
 def read_file(filename):
     try:
@@ -170,14 +225,14 @@ def read_file(filename):
         else:
             print('illegal game', 7)
             return
-        # for line in lines:
-    #         #     print(line.strip())
-
     except FileNotFoundError:
         print(9)
 
 
-# must be integers, must be one number per line
+"""To be a valid file, the inputted data must be integers and must be one number per line. This method providdes very basic parsing
+of the inputted file in order to check this."""
+
+
 def invalid_file(first_line_array, game_moves):
     for line in game_moves:
         if line.__contains__(' '):
@@ -218,6 +273,11 @@ def integer_conversion(string_array):
     for char in string_array:
         number_array.append(int(char))
     return number_array
+
+
+"""
+ This method checks whether the game is legal given the game dimensions - any target over the column and row length is not legal.
+"""
 
 
 def illegal_game(game_dimensions):
