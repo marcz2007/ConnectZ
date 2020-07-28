@@ -65,5 +65,3 @@ that can never be won.
 8 Invalid file The file is opened but does not conform the format.
 9 File error The file can not be found, opened or read for some reason.
 
-1.7 Assessment
-We will judge your submission on a number of criteria.
